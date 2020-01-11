@@ -1,0 +1,50 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "SqlServerParams": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "location": "[parameters('SqlServerParams').location]",
+        "serverName": "[parameters('SqlServerParams').serverName]",
+        "administratorLogin": "[parameters('SqlServerParams').administratorLogin]",
+        "administratorLoginPassword": "[parameters('SqlServerParams').administratorLoginPassword]",
+        "databaseName": "[parameters('SqlServerParams').databaseName]",
+        "skuName": "[parameters('SqlServerParams').skuName]",
+        "tier": "[parameters('SqlServerParams').tier]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2015-05-01-preview",
+            "location": "[variables('location')]",
+            "name": "[variables('serverName')]",
+            "properties": {
+                "administratorLogin": "[variables('administratorLogin')]",
+                "administratorLoginPassword": "[variables('administratorLoginPassword')]",
+                "version": "12.0"
+            },
+            "resources": [
+                {
+                    "apiVersion": "2017-10-01-preview",
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', variables('serverName'))]"
+                    ],
+                    "location": "[variables('location')]",
+                    "name": "[variables('databaseName')]",
+                    "properties": {
+                        "collation": "SQL_Latin1_General_CP1_CI_AS"
+                    },
+                    "sku": {
+                        "name": "[variables('skuName')]",
+                        "tier": "[variables('tier')]"
+                    },
+                    "type": "databases"
+                }
+            ],
+            "type": "Microsoft.Sql/servers"
+        }
+    ]
+
+}
