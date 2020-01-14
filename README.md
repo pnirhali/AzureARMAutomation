@@ -10,3 +10,6 @@ Created one json template for Azure SQL.
  Parameterized resource group name and subscription name.
 If client doesn't send any resouce group name to create then code will generate random char string.
 Added ErrorActionReference to stop further execution of code if any error occurs.
+
+Added support for role based access control using IAM
+Provided emails will have the "Owner" role over the deployed resource group.

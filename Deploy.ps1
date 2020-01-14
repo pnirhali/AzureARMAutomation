@@ -1,9 +1,16 @@
 #Passing template name in order to deploy selected template
-param ($SubscriptionName, $templateName, $resourceGroupName)
+param ($SubscriptionName, 
+    $templateName = "VirtualNetwork", 
+    $resourceGroupName = "Poonam-RG1",
+    [string[]] $emails = @("poonamdhimate@gmail.com"))
 
 # errorActionPreference will not execute further code if system gets any error.
 $ErrorActionPreference = "STOP"
 
+Import-Module Az
+Import-Module AzureAD
+Import-Module Az.Resources
+Enable-AzureRmAlias
 
 # local functions start ======================================
 function  Get-RandomChars {
@@ -11,7 +18,7 @@ function  Get-RandomChars {
         [int] $length = 5 
     )
     $randomChars = -join ((65..90) + ( 97..122) | Get-Random -Count $length | % { [char]$_ })
-   return $randomChars
+    return $randomChars
 }
 
 # local functions end ======================================
@@ -20,6 +27,7 @@ $templatePath = "Templates\$templateName.json"
 write-Output "selected Template path:$templatePath"
 
 #create template parameter object 
+$randomVar = (Get-RandomChars -length 5)
 $TemplateObject = @{ }
 switch ($templateName) {
     "SqlServer" {
@@ -30,7 +38,7 @@ switch ($templateName) {
             "tier"                       = "Basic";
             "skuName"                    = "Basic";
             "location"                   = "Australia East";
-            "serverName"                 = "poonamserver";
+            "serverName"                 = "poonamserver_$randomVar" ;
         }
         $TemplateObject.SqlServerParams = $SqlServerTemplateObject
         write-Output "Created Sql server param object"
@@ -38,7 +46,7 @@ switch ($templateName) {
     }
     "VirtualNetwork" {
         $VirtualNetworkTemplateObject = @{ 
-            "name"                 = "resource21-Vnet";
+            "name"                 = "resource21-Vnet_$randomVar";
             "location"             = "North Europe";
             "addressPrefix"        = "10.1.0.0/16";
             "subnetName"           = "default";
@@ -74,9 +82,19 @@ Write-Output "creating template parameter object"
 
 #2.Deployment started
 Write-Output "Deployment started"
-New-AzResourceGroupDeployment -Name "RgDeployment" `
-    -ResourceGroupName "PoonamRG1" `
-    -TemplateParameterObject  $TemplateObject  `
+$NewRGObject = New-AzResourceGroupDeployment -Name "RgDeployment" `
+    -ResourceGroupName $resourceGroupName `
+    -TemplateParameterObject  $TemplateObject `
     -TemplateFile $templatePath
 
-   
+Write-Output $NewRGObject.ProvisioningState 
+
+foreach ($email in $emails) {
+    if (($NewRGObject.ProvisioningState -eq "Succeeded" ) -and $email) {
+
+        $AdUser = Get-AzureRmADUser -UserPrincipalName $email
+        if (!$AdUser) {
+            New-AzRoleAssignment -ObjectId $AdUser.Id -ResourceGroupName $NewRGObject.ResourceGroupName -RoleDefinitionName "Owner"
+        }
+    }
+}
