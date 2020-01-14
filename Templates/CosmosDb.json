@@ -1,0 +1,49 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "CosmosDbParams": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "name": "[parameters('CosmosDbParams').name]",
+        "location":"[parameters('CosmosDbParams').location]",
+        "locationName": "[parameters('CosmosDbParams').locationName]",
+        "defaultExperience": "[parameters('CosmosDbParams').defaultExperience]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-12-12",
+            "kind": "GlobalDocumentDB",
+            "type": "Microsoft.DocumentDb/databaseAccounts",
+            "name": "[variables('name')]",
+             "location": "[variables('location')]",
+            "properties": {
+                "databaseAccountOfferType": "Standard",
+                "locations": [
+                    {
+                        "id": "[concat(variables('name'), '-', variables('location'))]",
+                        "failoverPriority": 0,
+                        "locationName": "[variables('locationName')]"
+                    }
+                ],
+                "enableMultipleWriteLocations": false,
+                "isVirtualNetworkFilterEnabled": false,
+                "virtualNetworkRules": [
+                ],
+                "ipRangeFilter": "",
+                "dependsOn": [
+                ],
+                "capabilities": [
+                ]
+            },
+            "tags": {
+                "defaultExperience": "[variables('defaultExperience')]",
+                "hidden-cosmos-mmspecial": ""
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

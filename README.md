@@ -13,3 +13,5 @@ Added ErrorActionReference to stop further execution of code if any error occurs
 
 Added support for role based access control using IAM
 Provided emails will have the "Owner" role over the deployed resource group.
+
+Contains ARM template for SQL Server, Cosmos DB, Virtual Network.

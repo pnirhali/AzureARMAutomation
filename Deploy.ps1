@@ -56,6 +56,17 @@ switch ($templateName) {
         $TemplateObject.virtualNetworkParams = $VirtualNetworkTemplateObject
         write-Output "Created Virtual Network param object"
     }
+
+    "CosmosDB" {
+        $CosmosDbTemplateObject = @{
+            "name"              = "cosmosDb-$randomVar".ToLowerInvariant();
+            "location"          = "westus";
+            "locationName"      = "West US";
+            "defaultExperience" = "Core (SQL)";
+        }
+        $TemplateObject.CosmosDbParams = $CosmosDbTemplateObject
+        write-Output "Created Cosmos DB param object"
+    }
     Default { }
 }
 Write-Output "Created main template object for deployment cmd "$TemplateObject
